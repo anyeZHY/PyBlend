@@ -13,9 +13,7 @@ def reset_mat(mat):
 
 
 def create_texture_node(nodes: bpy.types.NodeGroup, path: str = None, img: bpy.types.Image = None) -> bpy.types.Node:
-    """
-    Create a texture node and load image from path or img
-    """
+    """Create a texture node and load image from path or img"""
     tex_node = nodes.new("ShaderNodeTexImage")
     if img is not None:
         tex_node.image = img

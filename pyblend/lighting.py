@@ -5,7 +5,8 @@ from pyblend.transform import random_loc
 
 
 def create_light(location, rotation, energy, color, size, type="area", name=None):
-    """Create a light with given parameters.
+    """
+    Create a light with given parameters.
 
     Args:
         type: "area", "spot" or "point"

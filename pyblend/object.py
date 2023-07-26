@@ -15,7 +15,8 @@ def create_plane(location, rotation, scale, name=None) -> bpy.types.Object:
 
 
 def load_obj(obj_root, obj_name, center=True):
-    """Load obj/ply file to Blender
+    """
+    Load obj/ply file to Blender
 
     Args:
         obj_root (str): path to obj/ply file

@@ -2,8 +2,6 @@
 
 PyBlend is a Python library for [Blender](https://www.blender.org/). It provides a lot of useful functions for Blender scripting.
 
-<img src="docs/hoi.gif" width="30%" />
-
 ## Installation
 
 Setting up the environment for Python in Blender is a challenge. However, following the steps below, you can easily configure the environment.
@@ -21,7 +19,7 @@ Setting up the environment for Python in Blender is a challenge. However, follow
     ```
     where `blender` is the executable file (I will use `{path/to/blender}` to represent this path in the following) and `3.3` contains the python environment for Blender.
 
-2. Download get-pip.py and install pip for Blender python.
+2. Download `get-pip.py` and install pip for Blender python.
 
     ```bash
     $ wget https://bootstrap.pypa.io/get-pip.py
@@ -41,6 +39,9 @@ Setting up the environment for Python in Blender is a challenge. However, follow
     $ ./blender-3.3.1-linux-x64/3.3/python/bin/pip install torch
     ```
 
+
+## Usage
+I recommend you to use `alias blender_app='{path/to/blender}'` to simplify the command.
 
 ## TODO
 **Still under development. More functions will be added soon.**
