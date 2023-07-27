@@ -19,7 +19,7 @@ def config_cycle_gpu(verbose=False):
     return devices
 
 
-def config_cycles(pre_sample=4, sample=16):
+def config_cycles(pre_sample=1024, sample=4096):
     """
     Config cycles render engine for preview_samples and samples
     """
@@ -27,8 +27,134 @@ def config_cycles(pre_sample=4, sample=16):
     bpy.data.scenes["Scene"].cycles.samples = sample
 
 
-def config_render(scene: bpy.types.Scene, res_x=640, res_y=480, file_format="PNG"):
-    bpy.context.preferences.edit.undo_steps = 0
-    scene.render.image_settings.file_format = file_format
-    scene.render.resolution_x = res_x
-    scene.render.resolution_y = res_y
+def config_render(
+    path="tmp/output.png", engine="CYCLES", res_x=640, res_y=480, file_format="PNG", transparent=True, enable_gpu=True
+):
+    """
+    Config render engine for path, engine, res_x, res_y, file_format, transparent
+    """
+
+    bpy.context.preferences.edit.undo_steps = 0  # disable undo
+
+    render = bpy.context.scene.render
+    render.filepath = path
+    render.image_settings.file_format = file_format
+    render.film_transparent = transparent
+    render.resolution_x = res_x
+    render.resolution_y = res_y
+    if engine.startswith("C"):
+        render.engine = "CYCLES"
+        config_cycles()
+        bpy.data.scenes["Scene"].cycles.use_denoising = True
+        if enable_gpu:
+            config_cycle_gpu()
+    else:
+        render.engine = "BLENDER_EEVEE"
+
+
+def enable_depth_render(base_path="output", reverse=False):
+    """
+    Enable depth render and output exr and png. The png is normalized to [0, 1]
+    and saved in base_path. The exr is the raw depth value. The png is useful for
+    visualization.
+
+    Args:
+        base_path (str, optional): base path to save the exr and png. Defaults to "output".
+        reverse (bool, optional): whether to reverse the depth value. Defaults to False.
+    """
+    bpy.context.scene.use_nodes = True
+    bpy.data.scenes["Scene"].view_layers["ViewLayer"].use_pass_z = True
+    nodes = bpy.context.scene.node_tree.nodes
+    links = bpy.context.scene.node_tree.links
+    if "Render Layers" not in nodes:
+        render_node = nodes.new("CompositorNodeRLayers")
+    else:
+        render_node = nodes["Render Layers"]
+    if "Composite" not in nodes:
+        output_node = nodes.new("CompositorNodeComposite")
+    else:
+        output_node = nodes["Composite"]
+
+    link1 = links.new(render_node.outputs[0], output_node.inputs[0])
+    exr_output_node = nodes.new("CompositorNodeOutputFile")
+    exr_output_node.format.file_format = "OPEN_EXR"
+    # read exr with:
+    # 1. OPENCV_IO_ENABLE_OPENEXR=1
+    # 2. cv2.imread(PATH_TO_EXR_FILE, cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)
+    exr_output_node.base_path = base_path
+    link2 = links.new(render_node.outputs[2], exr_output_node.inputs[0])
+
+    # add normalized png depth
+    output_node2 = nodes.new("CompositorNodeNormalize")
+    png_output_node = nodes.new("CompositorNodeOutputFile")
+    png_output_node.format.file_format = "PNG"
+    png_output_node.base_path = base_path
+    link3 = links.new(render_node.outputs[2], output_node2.inputs[0])
+    if reverse:
+        output_node3 = nodes.new("CompositorNodeMath")
+        # x = 1 - x
+        output_node3.operation = "MULTIPLY"
+        output_node3.inputs[1].default_value = -1
+        link4 = links.new(output_node2.outputs[0], output_node3.inputs[0])
+        output_node4 = nodes.new("CompositorNodeMath")
+        output_node4.operation = "ADD"
+        output_node4.inputs[1].default_value = 1
+        link5 = links.new(output_node3.outputs[0], output_node4.inputs[0])
+        link6 = links.new(output_node4.outputs[0], png_output_node.inputs[0])
+    else:
+        link4 = links.new(output_node2.outputs[0], png_output_node.inputs[0])
+    return exr_output_node, png_output_node
+
+
+def enable_normal_render(base_path="output"):
+    """
+    Enable normal render and output png. The png is normalized to [0, 1].
+    """
+    bpy.context.scene.use_nodes = True
+    bpy.data.scenes["Scene"].view_layers["ViewLayer"].use_pass_normal = True
+    nodes = bpy.context.scene.node_tree.nodes
+    links = bpy.context.scene.node_tree.links
+    if "Render Layers" not in nodes:
+        render_node = nodes.new("CompositorNodeRLayers")
+    else:
+        render_node = nodes["Render Layers"]
+
+    # Seperate RGBA
+    output_node1 = nodes.new("CompositorNodeSepRGBA")
+    link1 = links.new(render_node.outputs[3], output_node1.inputs[0])
+    # map RGB from [-1, 1] to [0, 1] separately (MapRange)
+    output_nodeR = nodes.new("CompositorNodeMapRange")
+    output_nodeR.inputs[1].default_value = -1
+    output_nodeR.inputs[2].default_value = 1
+    output_nodeR.inputs[3].default_value = 0
+    output_nodeR.inputs[4].default_value = 1
+    link2 = links.new(output_node1.outputs[0], output_nodeR.inputs[0])
+    output_nodeG = nodes.new("CompositorNodeMapRange")
+    output_nodeG.inputs[1].default_value = -1
+    output_nodeG.inputs[2].default_value = 1
+    output_nodeG.inputs[3].default_value = 0
+    output_nodeG.inputs[4].default_value = 1
+    link3 = links.new(output_node1.outputs[1], output_nodeG.inputs[0])
+    output_nodeB = nodes.new("CompositorNodeMapRange")
+    output_nodeB.inputs[1].default_value = -1
+    output_nodeB.inputs[2].default_value = 1
+    output_nodeB.inputs[3].default_value = 0
+    output_nodeB.inputs[4].default_value = 1
+    link4 = links.new(output_node1.outputs[2], output_nodeB.inputs[0])
+    # combine RGB
+    output_node2 = nodes.new("CompositorNodeCombRGBA")
+    link5 = links.new(output_nodeR.outputs[0], output_node2.inputs[0])
+    link6 = links.new(output_nodeG.outputs[0], output_node2.inputs[1])
+    link7 = links.new(output_nodeB.outputs[0], output_node2.inputs[2])
+    # output
+    png_output_node = nodes.new("CompositorNodeOutputFile")
+    png_output_node.format.file_format = "PNG"
+    png_output_node.base_path = base_path
+    link8 = links.new(output_node2.outputs[0], png_output_node.inputs[0])
+    return png_output_node
+
+
+def render_image(path=None):
+    if path is not None:
+        bpy.context.scene.render.filepath = path
+    bpy.ops.render.render(write_still=True)

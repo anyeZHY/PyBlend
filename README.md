@@ -1,6 +1,11 @@
 # PyBlend
 
-PyBlend is a Python library for [Blender](https://www.blender.org/). It provides a lot of useful functions for Blender scripting.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) **PyBlend is a Python library for [Blender](https://www.blender.org/). It provides a lot of useful functions for Blender scripting.**
+
+<p align="center">
+    <img src="docs/teaser.gif" width=810%>
+</p>
+<br>
 
 ## Installation
 
@@ -17,7 +22,7 @@ Setting up the environment for Python in Blender is a challenge. However, follow
     ├── 3.3
     ...
     ```
-    where `blender` is the executable file (I will use `{path/to/blender}` to represent this path in the following) and `3.3` contains the python environment for Blender.
+    where `blender` is the executable file (I will use `{path/to/blender}` or `blender_app` to represent this path in the following) and `3.3` contains the python environment for Blender.
 
 2. Download `get-pip.py` and install pip for Blender python.
 
@@ -43,9 +48,23 @@ Setting up the environment for Python in Blender is a challenge. However, follow
 ## Usage
 I recommend you to use `alias blender_app='{path/to/blender}'` to simplify the command.
 
+### Render Normal and Depth Images
+
+Like teaser.gif, you can render normal and depth images with PyBlend. The following command will render 60 images from 0 to 60 degrees.
+
+```shell
+$ blender_app -b -P scripts/teaser.py -- --begin 0 --end 60
+```
+
 ## TODO
 **Still under development. More functions will be added soon.**
 
 - [ ] Add visualization scripts.
 
 - [ ] Add instructions for rendering.
+
+- [ ] Add animation and physics simulation functions.
+
+- [ ] Support multi-processing rendering.
+
+- [ ] Add [Objaverse](https://objaverse.allenai.org) extension.

@@ -97,10 +97,7 @@ class BlenderRemover:
         self.meshes = []
         self.imgs = []
 
-    def clear_all(
-        self,
-        exclude: List(str or bpy.types.Object or bpy.types.Image or bpy.types.Mesh or bpy.types.Material) = [],
-    ):
+    def clear_all(self, exclude=[]):
         """
         Clear all objects, meshes, materials, and images created by Blender
 
@@ -111,6 +108,9 @@ class BlenderRemover:
             if mat not in exclude or mat.name not in exclude:
                 bpy.data.materials.remove(mat)
         for obj in bpy.data.objects:
+            # keep camera if only one camera is left
+            if obj.type == "CAMERA" and len(bpy.data.cameras) == 1:
+                continue
             if obj not in exclude or obj.name not in exclude:
                 bpy.data.objects.remove(obj)
         for mesh in bpy.data.meshes:
@@ -129,4 +129,4 @@ def debug(file_path="debug.blend"):
         file_path (str, optional): path to save the blend file. Defaults to "debug.blend".
     """
     print(f"Saving debug file to {os.path.abspath(file_path)}")
-    bpy.ops.wm.save_as_mainfile(filepath=file_path)
+    bpy.ops.wm.save_as_mainfile(filepath=os.path.abspath(file_path))

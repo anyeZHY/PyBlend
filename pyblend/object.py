@@ -13,6 +13,13 @@ def create_plane(location, rotation, scale, name=None) -> bpy.types.Object:
     plane.scale = scale
     return plane
 
+def create_monkey(location, rotation, scale, name=None) -> bpy.types.Object:
+    bpy.ops.mesh.primitive_monkey_add(location=location, rotation=rotation)
+    monkey = bpy.context.object
+    if name is not None:
+        monkey.name = name
+    monkey.scale = scale
+    return monkey
 
 def load_obj(obj_root, obj_name, center=True):
     """

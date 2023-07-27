@@ -12,6 +12,16 @@ def random_loc(loc, radius=[0, 1], theta=[-0.5, 0.5], phi=[-1, 1]):
     return loc
 
 
+def set_origin(obj: bpy.types.Object, loc=(0,0,0)):
+    """
+    Select the given object and set its center to the world origin.
+    """
+    bpy.ops.object.select_all(action="DESELECT")
+    obj.select_set(True)
+    bpy.ops.object.origin_set(type="ORIGIN_GEOMETRY", center="MEDIAN")
+    obj.location = loc
+
+
 def transform(obj: bpy.types.Object, matrix: Matrix or np.ndarray):
     obj.data.transform(Matrix(matrix))
     obj.data.update()
