@@ -1,11 +1,15 @@
 # PyBlend
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) **PyBlend is a Python library for [Blender](https://www.blender.org/). It provides a lot of useful functions for Blender scripting.**
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) 
+**PyBlend is a Python library for [Blender](https://www.blender.org/). It provides a lot of useful functions for Blender scripting.**
 
 <p align="center">
-    <img src="docs/teaser.gif" width=810%>
+    <img src="docs/teaser.gif" width=80%>
+    <!-- caption -->
+    <figcaption align="center">
+    <b>Figure 1.</b> <i>Depth maps, random material images, and normal maps rendered using PyBlend with the Stanford Bunny.</i>
+    </figcaption>
 </p>
-<br>
 
 ## Installation
 
@@ -48,7 +52,7 @@ Setting up the environment for Python in Blender is a challenge. However, follow
 ## Usage
 I recommend you to use `alias blender_app='{path/to/blender}'` to simplify the command.
 
-### Render Normal and Depth Images
+### 1. Render Normal and Depth Images
 
 Like teaser.gif, you can render normal and depth images with PyBlend. The following command will render 60 images from 0 to 60 degrees.
 
@@ -68,3 +72,9 @@ $ blender_app -b -P scripts/teaser.py -- --begin 0 --end 60
 - [ ] Support multi-processing rendering.
 
 - [ ] Add [Objaverse](https://objaverse.allenai.org) extension.
+
+## Other Resources
+- [Blender Python API](https://docs.blender.org/api/current/index.html)
+- [DLR-RM/BlenderProc](https://github.com/DLR-RM/BlenderProc)
+- [yuki-koyama/blender-cli-rendering](https://github.com/yuki-koyama/blender-cli-rendering)
+- [njanakiev/blender-scripting](https://github.com/njanakiev/blender-scripting)
