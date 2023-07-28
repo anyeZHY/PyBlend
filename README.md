@@ -49,7 +49,9 @@ Setting up the environment for Python in Blender is a challenge. However, follow
 
 
 ## Usage
-I recommend you use `alias blender_app='{path/to/blender}'` to simplify the command.
+Some functions of this package are used in [3D-LLM: Injecting the 3D World into Large Language Models](https://vis-www.cs.umass.edu/3dllm/) and [CHORD: Category-level in-Hand Object Reconstruction via Shape Deformation]() [ICCV 2023].
+
+I suggest using the following alias to simplify the command: `alias blender_app='{path/to/blender}'`.
 
 ### 1. Render Normal and Depth Images
 
@@ -86,6 +88,8 @@ $ blender_app -b -P scripts/multi_view.py -- --obj_path data/dragon.obj --name d
 - [ ] Add animation and physics simulation functions.
 
 - [ ] Add [Objaverse](https://objaverse.allenai.org) extension.
+
+## 
 
 ## Other Resources
 - [Blender Python API](https://docs.blender.org/api/current/index.html)
