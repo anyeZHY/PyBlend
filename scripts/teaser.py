@@ -1,8 +1,7 @@
 import bpy
 import numpy as np
-from pyblend.object import load_obj
-from pyblend.object import create_plane
 from pyblend.lighting import config_world
+from pyblend.object import load_obj, create_plane
 from pyblend.material import random_mat, set_voronoi_texture
 from pyblend.utils import BlenderRemover, ArgumentParserForBlender, debug
 from pyblend.render import config_render, render_image, enable_depth_render, enable_normal_render

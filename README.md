@@ -16,8 +16,8 @@ Setting up the environment for Python in Blender is a challenge. However, follow
 
 1. Download Blender from [here](https://www.blender.org/download/).
     
-    If your project has high environmental requirements, you must carefully select the version of Blender. Also, there seems to be NO such version of Blender that supports Python 3.8, which could be checked from [blender/tags](https://github.com/blender/blender/tags). Here I use `blender-3.3.1-linux-x64.tar.xz` for Linux users with Python 3.10.2.
-    Unzip the file and you will get a folder like this:
+    Note: if your project has strict environmental requirements, you must carefully select the version of Blender. Currently, there appears to be **NO** official release of Blender that directly supports Python 3.8, which can be verified from [blender/tags](https://github.com/blender/blender/tags). Here I use `blender-3.3.1-linux-x64.tar.xz` for Linux users with Python 3.10.2.
+    Once you unzip the file, you will find a folder structured like this:
 
     ```bash
     ./blender-3.3.1-linux-x64
@@ -53,22 +53,37 @@ I recommend you use `alias blender_app='{path/to/blender}'` to simplify the comm
 
 ### 1. Render Normal and Depth Images
 
-Like teaser.gif, you can render normal and depth images with PyBlend. The following command will generate 60 images from 0 to 60 degrees.
+Similar to teaser.gif, you can use PyBlend to render both normal and depth images. By using the following command, you can generate 60 images ranging from 0 to 60 degrees.
 
 ```shell
 $ blender_app -b -P scripts/teaser.py -- --begin 0 --end 60
 ```
 
+### 2. OBJ in, Multi-view Images out
+<br>
+<p align="center">
+    <img src="docs/multiview.gif" width=80%>
+    <p align="center">
+        <b>Figure 2.</b> <i>Multi-view images rendered using PyBlend with the XYZ Dragon, teapot, and Stanford Bunny.</i>
+    </p>
+</p>
+
+With PyBlend, you can effortlessly render multi-view images from a single OBJ file. Using the provided command, you’ll be able to generate an impressive set of 30 images. Additionally, you have the option to assign HEX color to the object using the `--color` argument. A big thank you to [Silvia Sellán](https://www.silviasellan.com) for generously sharing her insightful [blog](https://research.siggraph.org/blog/guides/rendering-a-paper-figure-with-blender/)!
+
+```shell
+$ blender_app -b -P scripts/multi_view.py -- --obj_path data/bunny.obj --name bunny --num_views 30
+
+$ blender_app -b -P scripts/multi_view.py -- --obj_path data/dragon.obj --name dragon --num_views 30 --color 127EB4
+```
+
 ## TODO
 **Still under development. More functions will be added soon.**
 
-- [ ] Add visualization scripts.
+- [x] Add visualization scripts.
 
 - [ ] Add instructions for rendering.
 
 - [ ] Add animation and physics simulation functions.
-
-- [ ] Support multi-processing rendering.
 
 - [ ] Add [Objaverse](https://objaverse.allenai.org) extension.
 

@@ -2,7 +2,7 @@ import bpy
 import numpy as np
 from mathutils import Matrix
 
-from pyblend.transform import transform, center_vert_bbox
+from pyblend.transform import transform, center_vert_bbox, get_vertices
 
 
 def create_plane(location, rotation, scale, name=None) -> bpy.types.Object:
@@ -13,6 +13,7 @@ def create_plane(location, rotation, scale, name=None) -> bpy.types.Object:
     plane.scale = scale
     return plane
 
+
 def create_monkey(location, rotation, scale, name=None) -> bpy.types.Object:
     bpy.ops.mesh.primitive_monkey_add(location=location, rotation=rotation)
     monkey = bpy.context.object
@@ -20,6 +21,7 @@ def create_monkey(location, rotation, scale, name=None) -> bpy.types.Object:
         monkey.name = name
     monkey.scale = scale
     return monkey
+
 
 def load_obj(obj_root, obj_name, center=True):
     """
@@ -42,9 +44,7 @@ def load_obj(obj_root, obj_name, center=True):
     obj_mesh = bpy.data.meshes[obj_name]
 
     if center:
-        vertices = np.ones(len(obj_mesh.vertices) * 3)
-        obj_mesh.vertices.foreach_get("co", vertices)
-        vertices = vertices.reshape(-1, 3)
+        vertices = get_vertices(obj)
         _, offset, _ = center_vert_bbox(vertices, scale=False)
         matrix = np.eye(4)
         matrix[:3, 3] = -offset
@@ -57,3 +57,8 @@ def load_obj(obj_root, obj_name, center=True):
     bpy.ops.uv.smart_project()
     bpy.ops.object.mode_set(mode="OBJECT")
     return obj
+
+
+def enable_shaow_catcher(obj):
+    assert bpy.context.scene.render.engine == "CYCLES", "Only support Cycles"
+    obj.is_shadow_catcher = True

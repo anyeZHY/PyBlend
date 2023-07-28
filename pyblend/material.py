@@ -47,7 +47,13 @@ def load_mat_library(lib_root):
         data_to.materials = data_from.materials
 
 
-def set_voronoi_texture(mat):
+def set_voronoi_texture(mat_or_obj):
+    if isinstance(mat_or_obj, bpy.types.Material):
+        mat = mat_or_obj
+    elif isinstance(mat_or_obj, bpy.types.Object):
+        mat = mat_or_obj.active_material
+    else:
+        raise TypeError("mat_or_obj must be either Material or Object")
     if mat is None:
         mat = bpy.data.materials.new(name="Material")
         mat.use_nodes = True
