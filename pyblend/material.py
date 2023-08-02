@@ -52,8 +52,10 @@ def set_voronoi_texture(mat_or_obj):
         mat = mat_or_obj
     elif isinstance(mat_or_obj, bpy.types.Object):
         mat = mat_or_obj.active_material
+    elif mat_or_obj is None:
+        mat = None
     else:
-        raise TypeError("mat_or_obj must be either Material or Object")
+        raise TypeError(f"mat_or_obj must be Material or Object, got {type(mat_or_obj)}")
     if mat is None:
         mat = bpy.data.materials.new(name="Material")
         mat.use_nodes = True

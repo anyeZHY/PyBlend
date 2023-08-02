@@ -71,9 +71,9 @@ $ blender_app -b -P scripts/teaser.py -- --begin 0 --end 60
 With PyBlend, you can effortlessly render multi-view images from a single OBJ file. Using the provided command, you’ll be able to generate an impressive set of 30 images. Additionally, you have the option to assign HEX color to the object using the `--color` argument. A big thank you to [Silvia Sellán](https://www.silviasellan.com) for generously sharing her insightful [blog](https://research.siggraph.org/blog/guides/rendering-a-paper-figure-with-blender/)!
 
 ```shell
-$ blender_app -b -P scripts/multi_view.py -- --obj_path data/bunny.obj --name bunny --num_views 30
+$ blender_app -b -P scripts/multiview.py -- --input docs/bunny.obj --name bunny --num 30
 
-$ blender_app -b -P scripts/multi_view.py -- --obj_path data/dragon.obj --name dragon --num_views 30 --color 127EB4
+$ blender_app -b -P scripts/multiview.py -- --input docs/dragon.obj --name dragon --num 30 --color 127EB4
 ```
 
 ## TODO
