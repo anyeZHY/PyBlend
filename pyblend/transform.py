@@ -3,8 +3,7 @@ import math
 import numpy as np
 from mathutils import Matrix, Vector
 from numpy.random import rand, uniform
-
-
+from pyblend.find import find_all_meshes, scene_meshes, scene_root_objects
 
 def get_vertices(obj_or_mesh: bpy.types.Object or bpy.types.Mesh, mode="obj"):
     """
@@ -151,42 +150,6 @@ def obj_bbox(obj: bpy.types.Object, ignore_matrix=False):
     return Vector(bbox_min), Vector(bbox_max)
 
 
-def find_all_meshes(obj: bpy.types.Object):
-    """
-    Find all meshes in the given object and its children.
-
-    Args:
-        obj (bpy.types.Object): The object.
-
-    Returns:
-        List[bpy.types.Object]: The list of meshes.
-    """
-    meshes = []
-    if isinstance(obj.data, bpy.types.Mesh):
-        meshes.append(obj)
-    for child in obj.children:
-        meshes.extend(find_all_meshes(child))
-    return meshes
-
-
-def scene_root_objects(objs=None):
-    """
-    Iterate over all root objects in the scene.
-    """
-    for obj in bpy.context.scene.objects.values():
-        if not obj.parent:
-            yield obj
-
-
-def scene_meshes():
-    """
-    Iterate over all meshes in the scene.
-    """
-    for obj in bpy.context.scene.objects.values():
-        if isinstance(obj.data, (bpy.types.Mesh)):
-            yield obj
-
-
 def normalize_scene():
     """
     Normalize the scene to have unit bounding box and center at the world origin.
@@ -214,7 +177,6 @@ def normalize_obj(obj: bpy.types.Object):
     # Apply scale to matrix_world.
     bpy.context.view_layer.update()
     bbox_min, bbox_max = obj_bbox(obj)
-    print(np.array(bbox_min), np.array(bbox_max))
     offset = -(bbox_min + bbox_max) / 2
     obj.matrix_world.translation += offset
 
