@@ -7,5 +7,5 @@ setup(
     author="Haoyu Zhen",
     author_email="anye_zhen@sjtu.edu.cn",
     packages=find_packages(),
-    install_requires=["numpy"],
+    install_requires=["numpy", "objaverse"],
 )

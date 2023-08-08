@@ -89,6 +89,8 @@ $ blender_app -b -P scripts/multiview.py -- --input docs/dragon.obj --name drago
 
 - [ ] Add [Objaverse](https://objaverse.allenai.org) extension.
 
+- [ ] Documentation.
+
 ## 
 
 ## Other Resources

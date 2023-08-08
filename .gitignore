@@ -1,5 +1,5 @@
 **/tmp/**
-**/debug.blend
+**/debug*.blend*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
