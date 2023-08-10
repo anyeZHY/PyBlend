@@ -117,7 +117,7 @@ class BlenderRemover:
             if mesh not in exclude or mesh.name not in exclude:
                 bpy.data.meshes.remove(mesh)
         for img in bpy.data.images:
-            if img not in exclude or img.name not in exclude:
+            if (img not in exclude or img.name not in exclude) and img.users == 0:
                 bpy.data.images.remove(img)
 
 

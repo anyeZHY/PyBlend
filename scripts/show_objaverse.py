@@ -1,13 +1,22 @@
+import cv2
 import bpy
 import random
 import objaverse
 import numpy as np
 from pyblend.object import load_obj
 from pyblend.lighting import config_world, create_light
-from pyblend.utils import BlenderRemover, ArgumentParserForBlender
-from pyblend.render import config_render, render_image
-from pyblend.transform import look_at, normalize_obj, againts_wall, random_loc
-from pyblend.mesh import get_meshes
+from pyblend.utils import BlenderRemover, ArgumentParserForBlender, debug
+from pyblend.render import (
+    config_render,
+    render_image,
+    enable_segmentation_render,
+    enable_depth_render,
+    enable_normal_render,
+)
+from pyblend.transform import look_at, normalize_obj, random_loc, obj_bbox, random_transform, persp_project
+from pyblend.find import find_all_objects
+from pyblend.camera import get_camera_para
+from pyblend.viztools import plot_corner
 
 
 def load_objaverse(uids, download_processes=1):
@@ -19,23 +28,63 @@ def load_objaverse(uids, download_processes=1):
 
 
 if __name__ == "__main__":
-    uids = objaverse.load_uids()
-    uids = uids[:10]
-    objects = load_objaverse(uids)  # dict: uid -> object
+    random.seed(42)
+    np.random.seed(42)
+
+    uids = objaverse.load_lvis_annotations()  # dict of class -> list of uids
+    uids = [uid for uid_list in uids.values() for uid in uid_list]
+    uids = random.sample(uids, 100)
 
     # ======== Config ========
-    config_render(res_x=320, res_y=240, transparent=True)
+    config_render(res_x=640, res_y=640, transparent=False)
     remover = BlenderRemover()
     remover.clear_all()
     config_world(0.3)
     camera = bpy.data.objects["Camera"]
+    exr_seg_node, png_seg_node = enable_segmentation_render("tmp/objaverse", max_value=10)
+    exr_depth_node, png_depth_node = enable_depth_render("tmp/objaverse", reverse=True)
+    png_normal_node = enable_normal_render("tmp/objaverse")
+    png_seg_node.file_slots[0].path = f"seg_"
+    exr_seg_node.file_slots[0].path = f"seg_"
+    png_depth_node.file_slots[0].path = f"depth_"
+    exr_depth_node.file_slots[0].path = f"depth_"
+    png_normal_node.file_slots[0].path = f"normal_"
+    debug()
 
-    uid, path = random.choice(list(objects.items()))
     # ======== Set up scene ========
-    obj = load_obj(path, "object", center=True, join=True)
-    obj.location = (0, 0, 0)
-    normalize_obj(obj)
-    camera.location = random_loc((0, 0, 0), (3, 3), theta=(-1, 1), phi=(0, 1))
-    look_at(camera, (0, 0, 0))
-    # ======== Render ========
-    render_image(f"tmp/objaverse/out.png")
+    for scene_idx in range(10):
+        objects = load_objaverse(random.sample(uids, 10))
+        bbox_list = []
+        for ii, (uid, path) in enumerate(objects.items()):
+            # load object
+            obj = load_obj(path, "object", center=False, join=True)
+            obj.location = (0, 0, 0)
+            normalize_obj(obj)
+            for obj in find_all_objects(obj):
+                obj.pass_index = ii + 1
+            random_transform(obj, offset_scale=2)
+            bbox = obj_bbox(obj, mode="box")  # (8, 3)
+            bbox_list.append(bbox)
+
+        # ======== Render ========
+        for camera_idx in range(2):
+            camera.location = random_loc((0, 0, 0), (8, 8), theta=(-1, 1), phi=(0, 1))
+            look_at(camera, (0, 0, 0))
+            bpy.context.view_layer.update()
+            camera_para = get_camera_para(camera)
+            intr = camera_para["intrinsic"]  # (3, 3)
+            extr = camera_para["extrinsic"]  # (4, 4)
+            bbox2d_list = []
+            for bbox in bbox_list:
+                bbox2cam = extr.dot(np.concatenate([bbox, np.ones((8, 1))], axis=1).transpose()).transpose()[
+                    :, :3
+                ]  # (8, 3)
+                bbox2d = persp_project(bbox2cam, intr)  # (8, 2)
+                bbox2d_list.append(bbox2d)
+            bpy.context.scene.frame_current = scene_idx * 2 + camera_idx
+            render_image(f"tmp/objaverse/out_{scene_idx * 2 + camera_idx:04d}.png")
+            image = cv2.imread(f"tmp/objaverse/out_{scene_idx * 2 + camera_idx:04d}.png", cv2.IMREAD_UNCHANGED)
+            for bbox2d in bbox2d_list:
+                image = plot_corner(image, bbox2d, linewidth=1)
+            cv2.imwrite(f"tmp/objaverse/out_bbox_{scene_idx * 2 + camera_idx:04d}.png", image)
+        remover.clear_all()

@@ -3,7 +3,7 @@ import numpy as np
 from mathutils import Matrix
 
 
-def get_K_intr_from_blender(camera: bpy.types.Camera = None, width=None, height=None):
+def get_K_intr_from_blender(camera: bpy.types.Object = None, width=None, height=None):
     """
     Get the intrinsic matrix from Blender.
     """
@@ -12,9 +12,9 @@ def get_K_intr_from_blender(camera: bpy.types.Camera = None, width=None, height=
     if height is None:
         height = bpy.context.scene.render.resolution_y
     if camera is None:
-        angle = bpy.data.cameras["Camera"].angle
+        angle = bpy.data.objects["Camera"].data.angle
     else:
-        angle = camera.angle
+        angle = camera.data.angle
 
     aspect_ratio = width / height
     K = np.zeros((3, 3), dtype=np.float32)

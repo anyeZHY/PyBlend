@@ -5,6 +5,7 @@ from mathutils import Matrix, Vector
 from numpy.random import rand, uniform
 from pyblend.find import find_all_meshes, scene_meshes, scene_root_objects
 
+
 def get_vertices(obj_or_mesh: bpy.types.Object or bpy.types.Mesh, mode="obj"):
     """
     Get the vertices of the given object or mesh.
@@ -35,6 +36,7 @@ def set_vertices(obj_or_mesh: bpy.types.Object or bpy.types.Mesh, vertices):
     mesh: bpy.types.Mesh = obj_or_mesh.data if isinstance(obj_or_mesh, bpy.types.Object) else obj_or_mesh
     assert mesh is not None, "mesh is None"
     mesh.vertices.foreach_set("co", vertices.reshape(-1))
+    mesh.update()
 
 
 def random_loc(loc, radius=[0, 1], theta=[-0.5, 0.5], phi=[-1, 1]):
@@ -128,26 +130,58 @@ def scene_bbox(single_obj=None, ignore_matrix=False):
     return Vector(bbox_min), Vector(bbox_max)
 
 
-def obj_bbox(obj: bpy.types.Object, ignore_matrix=False):
+def obj_bbox(obj: bpy.types.Object, ignore_matrix=False, mode="minmax"):
     """
     Compute the bounding box of the given object.
 
     Args:
-        obj (bpy.types.Object): The object.
+        obj (bpy.types.Object): The object
+        ignore_matrix (bool, optional): If True, ignore the matrix_world of the object. Defaults to False.
+        mode (str, optional): "minmax" or "box". Defaults to "minmax".
 
     Returns:
         Tuple[Vector, Vector]: The minimum and maximum coordinates of the bounding box.
     """
-    bbox_min = (math.inf,) * 3
-    bbox_max = (-math.inf,) * 3
-    for obj in find_all_meshes(obj):
-        for coord in obj.bound_box:
-            coord = Vector(coord)
-            if not ignore_matrix:
-                coord = obj.matrix_world @ coord
-            bbox_min = tuple(min(x, y) for x, y in zip(bbox_min, coord))
-            bbox_max = tuple(max(x, y) for x, y in zip(bbox_max, coord))
-    return Vector(bbox_min), Vector(bbox_max)
+    if mode == "minmax":
+        bbox_min = (math.inf,) * 3
+        bbox_max = (-math.inf,) * 3
+        for obj in find_all_meshes(obj):
+            for coord in obj.bound_box:
+                coord = Vector(coord)
+                if not ignore_matrix:
+                    coord = obj.matrix_world @ coord
+                bbox_min = tuple(min(x, y) for x, y in zip(bbox_min, coord))
+                bbox_max = tuple(max(x, y) for x, y in zip(bbox_max, coord))
+        return Vector(bbox_min), Vector(bbox_max)
+    elif mode == "box":
+        # return a 8 * 3 array
+        bbox_min = (math.inf,) * 3
+        bbox_max = (-math.inf,) * 3
+        for obj in find_all_meshes(obj):
+            for coord in obj.bound_box:
+                coord = Vector(coord)
+                bbox_min = tuple(min(x, y) for x, y in zip(bbox_min, coord))
+                bbox_max = tuple(max(x, y) for x, y in zip(bbox_max, coord))
+        # canonical box
+        box = np.array(
+            [
+                [bbox_min[0], bbox_min[1], bbox_min[2]],
+                [bbox_min[0], bbox_min[1], bbox_max[2]],
+                [bbox_min[0], bbox_max[1], bbox_max[2]],
+                [bbox_min[0], bbox_max[1], bbox_min[2]],
+                [bbox_max[0], bbox_min[1], bbox_min[2]],
+                [bbox_max[0], bbox_min[1], bbox_max[2]],
+                [bbox_max[0], bbox_max[1], bbox_max[2]],
+                [bbox_max[0], bbox_max[1], bbox_min[2]],
+            ]
+        )
+        if not ignore_matrix:
+            box = np.concatenate([box, np.ones((8, 1))], axis=1)
+            box = box @ np.array(obj.matrix_world).T
+            box = box[:, :3]
+        return box
+    else:
+        raise ValueError(f"Unknown mode {mode}")
 
 
 def normalize_scene():
@@ -178,7 +212,8 @@ def normalize_obj(obj: bpy.types.Object):
     bpy.context.view_layer.update()
     bbox_min, bbox_max = obj_bbox(obj)
     offset = -(bbox_min + bbox_max) / 2
-    obj.matrix_world.translation += offset
+    obj.matrix_world = Matrix.Translation(offset) @ obj.matrix_world
+    bpy.context.view_layer.update()
 
 
 def transform(obj_or_mesh: bpy.types.Object or bpy.types.Mesh, matrix: Matrix or np.ndarray):
@@ -187,34 +222,17 @@ def transform(obj_or_mesh: bpy.types.Object or bpy.types.Mesh, matrix: Matrix or
     mesh.update()
 
 
-def random_transform(obj, matrix, scale):
-    camera_free = rand() * (2 * np.pi)
-    camera_free_rotmat = np.array(
-        [
-            [np.cos(camera_free), -np.sin(camera_free), 0],
-            [np.sin(camera_free), np.cos(camera_free), 0],
-            [0, 0, 1],
-        ]
-    )
-    matrix_tmp = np.concatenate(
-        [np.concatenate([camera_free_rotmat, np.zeros((3, 1))], axis=1), [[0, 0, 0, 1]]], axis=0
-    )
+def random_transform(obj: bpy.types.Object, offset_scale=1):
+    """
+    Randomly transform the object.
+    """
+    matrix = Matrix.Rotation(uniform(0, 2 * np.pi), 4, "Z")
+    matrix = matrix @ Matrix.Rotation(uniform(0, 2 * np.pi), 4, "Y")
+    matrix = matrix @ Matrix.Rotation(uniform(0, 2 * np.pi), 4, "X")
+    matrix = matrix @ Matrix.Translation(uniform(-1, 1, 3) * offset_scale)
 
-    theta = uniform(-0.5, 0.5) * np.pi
-    phi = uniform(-1 / 6, 1 + 1 / 6) * np.pi
-    offset = (
-        np.array(
-            [
-                np.cos(theta) * np.cos(phi),
-                np.cos(theta) * np.sin(phi),
-                np.sin(theta),
-            ]
-        )
-        * scale
-    )
-
-    transform(obj, matrix @ matrix_tmp)
-    obj.location = offset
+    obj.matrix_world = Matrix(matrix) @ obj.matrix_world
+    bpy.context.view_layer.update()
     return obj
 
 
@@ -229,3 +247,9 @@ def center_vert_bbox(vertices, bbox_center=None, bbox_scale=None, scale=False):
     else:
         bbox_scale = 1
     return vertices, bbox_center, bbox_scale
+
+
+def persp_project(points3d, cam_intr):
+    hom_2d = np.array(cam_intr).dot(points3d.transpose()).transpose()
+    points2d = (hom_2d / (hom_2d[:, 2:] + 1e-6))[:, :2]
+    return points2d.astype(np.float32)
