@@ -55,7 +55,7 @@ I suggest using the following alias to simplify the command: `alias blender_app=
 
 ### 1. Render Normal and Depth Images
 
-Similar to teaser.gif, you can use PyBlend to render both normal and depth images. By using the following command, you can generate 60 images ranging from 0 to 60 degrees.
+Like teaser.gif, you can use PyBlend to render normal and depth images. By using the following command, you can generate 60 images ranging from 0 to 60 degrees.
 
 ```shell
 $ blender_app -b -P scripts/teaser.py -- --begin 0 --end 60
@@ -91,9 +91,9 @@ $ blender_app -b -P scripts/multiview.py -- --input docs/dragon.obj --name drago
 
 The [Objaverse](https://objaverse.allenai.org) is an extensive 3D object dataset. To harness the potential of this dataset, we offer a script designed to assemble scenes with informative annotations. The script seamlessly fetches the required objects and orchestrates the rendering of scenes. By executing the following command, you can produce a total of `{num_scene} * {num_views}` images, with `{num_obj}` different objects randomly selected and positioned within each scene:
 ```shell
-$ blender_app -b -P scripts/show_objaverse.py --noaudio -- --num_scene 10 --num_views 2 --num_obj 10
+$ blender_app -b -P scripts/show_objaverse.py -noaudio -- --num_scene 10 --num_views 2 --num_obj 10
 ```
-Please note that the `--noaudio` flag is included in order to prevent any audio device usage during this process.
+Please note that the `-noaudio` flag is included in order to prevent any audio device usage during this process.
 
 ## TODO
 **Still under development. More functions will be added soon.**
