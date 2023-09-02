@@ -39,6 +39,18 @@ def set_vertices(obj_or_mesh: bpy.types.Object or bpy.types.Mesh, vertices):
     mesh.update()
 
 
+def get_faces(obj_or_mesh: bpy.types.Object or bpy.types.Mesh):
+    """
+    Get the faces of the given object or mesh.
+    """
+    mesh = obj_or_mesh.data if isinstance(obj_or_mesh, bpy.types.Object) else obj_or_mesh
+    assert mesh is not None, "mesh is None"
+    faces = np.ones(len(mesh.polygons) * 3)
+    mesh.polygons.foreach_get("vertices", faces)
+    faces = faces.reshape(-1, 3)  # (N, 3)
+    return faces
+
+
 def random_loc(loc, radius=[0, 1], theta=[-0.5, 0.5], phi=[-1, 1]):
     radius = uniform(radius[0], radius[1])
     theta = uniform(theta[0], theta[1]) * np.pi

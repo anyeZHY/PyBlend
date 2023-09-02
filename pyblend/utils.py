@@ -45,6 +45,15 @@ class ArgumentParserForBlender(argparse.ArgumentParser):
         """
         return super().parse_args(args=self._get_argv_after_doubledash())
 
+    def parse_known_args(self):
+        """
+        This method is expected to behave identically as in the superclass,
+        except that the sys.argv list will be pre-processed using
+        _get_argv_after_doubledash before. See the docstring of the class for
+        usage examples and details.
+        """
+        return super().parse_known_args(args=self._get_argv_after_doubledash())
+
 
 class BlenderRemover:
     """
