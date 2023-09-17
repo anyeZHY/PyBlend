@@ -66,6 +66,8 @@ def enable_depth_render(base_path="output", reverse=False):
     """
     bpy.context.scene.use_nodes = True
     bpy.data.scenes["Scene"].view_layers["ViewLayer"].use_pass_z = True
+    bpy.data.scenes["Scene"].view_layers["ViewLayer"].pass_alpha_threshold = 0
+
     nodes = bpy.context.scene.node_tree.nodes
     links = bpy.context.scene.node_tree.links
     if "Render Layers" not in nodes:
@@ -114,6 +116,8 @@ def enable_normal_render(base_path="output"):
     """
     bpy.context.scene.use_nodes = True
     bpy.data.scenes["Scene"].view_layers["ViewLayer"].use_pass_normal = True
+    bpy.data.scenes["Scene"].view_layers["ViewLayer"].pass_alpha_threshold = 0
+
     nodes = bpy.context.scene.node_tree.nodes
     links = bpy.context.scene.node_tree.links
     if "Render Layers" not in nodes:
