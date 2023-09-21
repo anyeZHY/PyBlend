@@ -23,36 +23,28 @@ class ArgumentParserForBlender(argparse.ArgumentParser):
     >>> blender --python my_script.py --
     """
 
-    def _get_argv_after_doubledash(self):
+    def _get_argv_after_doubledash(self, args=None):
         """
         Given the sys.argv as a list of strings, this method returns the
         sublist right after the '--' element (if present, otherwise returns
         an empty list).
         """
+        if args is not None:
+            return args
         try:
             idx = sys.argv.index("--")
             return sys.argv[idx + 1 :]  # the list after '--'
         except ValueError as e:  # '--' not in the list:
             return []
 
-    # overrides superclass
-    def parse_args(self):
+    def parse_known_args(self, args=None, namespace=None):
         """
         This method is expected to behave identically as in the superclass,
         except that the sys.argv list will be pre-processed using
         _get_argv_after_doubledash before. See the docstring of the class for
         usage examples and details.
         """
-        return super().parse_args(args=self._get_argv_after_doubledash())
-
-    def parse_known_args(self):
-        """
-        This method is expected to behave identically as in the superclass,
-        except that the sys.argv list will be pre-processed using
-        _get_argv_after_doubledash before. See the docstring of the class for
-        usage examples and details.
-        """
-        return super().parse_known_args(args=self._get_argv_after_doubledash())
+        return super().parse_known_args(args=self._get_argv_after_doubledash(args), namespace=None)
 
 
 class BlenderRemover:
