@@ -49,7 +49,9 @@ Setting up the environment for Python in Blender is a challenge. However, follow
 
 
 ## Usage
-Some functions of this package are used in [3D-LLM: Injecting the 3D World into Large Language Models](https://vis-www.cs.umass.edu/3dllm/) and [CHORD: Category-level in-Hand Object Reconstruction via Shape Deformation]() [ICCV 2023].
+Some functions of this package are used in the following papers:
+- [3D-LLM: Injecting the 3D World into Large Language Models](https://vis-www.cs.umass.edu/3dllm/) [NeurIPS 2023].
+- [CHORD: Category-level in-Hand Object Reconstruction via Shape Deformation](https://arxiv.org/pdf/2308.10574.pdf) [ICCV 2023].
 
 I suggest using the following alias to simplify the command: `alias blender_app='{path/to/blender}'`.
 
@@ -82,7 +84,7 @@ $ blender_app -b -P scripts/multiview.py -- --input docs/dragon.obj --name drago
 
 <br>
 <p align="center">
-    <img src="docs/objaverse.gif" width=800%>
+    <img src="docs/objaverse.gif" width=100%>
     <p align="center">
         <!-- five pictures: seg, bbox, rgb, normal, depth -->
         <b>Figure 3.</b> <i>Rendering images for Objaverse dataset. Our script provides <b>semantic segmentation (left)</b>, <b>bounding box (middle left)</b>, <b>RGB (middle)</b>, <b>normal map (middle right)</b>, and <b>depth map (right)</b> images.</i>
@@ -94,6 +96,18 @@ The [Objaverse](https://objaverse.allenai.org) is an extensive 3D object dataset
 $ blender_app -b -P scripts/show_objaverse.py -noaudio -- --num_scene 10 --num_views 2 --num_obj 10
 ```
 Please note that the `-noaudio` flag is included in order to prevent any audio device usage during this process.
+
+### 4. Soft Body Simulation (Coming Soon!)
+
+<br>
+<p align="center">
+    <img src="docs/softbody-1.gif" width=40%>
+    <img src="docs/softbody-2.gif" width=40%>
+    <p align="center">
+        <b>Figure 4.</b> <i>Soft body simulation using PyBlend with the Teddy Bear and Cloth.</i>
+    </p>
+</p>
+
 
 ## TODO
 **Still under development. More functions will be added soon.**
