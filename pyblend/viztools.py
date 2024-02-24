@@ -4,6 +4,7 @@ import numpy as np
 import math
 from mathutils import Matrix
 import bmesh
+from pyblend.transform import circle2d_coords
 
 
 class COLOR_CONST:
