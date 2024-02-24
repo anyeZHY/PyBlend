@@ -265,3 +265,23 @@ def persp_project(points3d, cam_intr):
     hom_2d = np.array(cam_intr).dot(points3d.transpose()).transpose()
     points2d = (hom_2d / (hom_2d[:, 2:] + 1e-6))[:, :2]
     return points2d.astype(np.float32)
+
+
+def circle2d_coords(radius, steps, offset, ox, oy):
+    """
+    Generates 2D coordinates of a circle.
+
+    Args:
+        radius (float): Radius of the circle.
+        steps (int): Number of steps.
+        offset (float): Offset angle.
+        ox (float): X coordinate of the center.
+        oy (float): Y coordinate of the center.
+    """
+    r = []
+    angstep = 2 * math.pi / steps
+    for i in range(steps):
+        x = math.sin(i * angstep + offset) * radius + ox
+        y = math.cos(i * angstep + offset) * radius + oy
+        r.append((x, y))
+    return r
