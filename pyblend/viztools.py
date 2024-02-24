@@ -472,3 +472,5 @@ def calc_mesh(pc_np, name="PointCloud", colors=None, mesh_type="TETRAHEDRON", le
         colors = colors.reshape(-1)
         vc = o.data.vertex_colors.new()
         vc.data.foreach_set("color", colors)
+
+    return o
